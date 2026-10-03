@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Categories - E-Commerce Store</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Header Section -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900">All Categories</h1>
+                <p class="text-sm text-slate-500 mt-1">Explore all departments available in our store</p>
+            </div>
+            <!-- Back to Home Link -->
+            <a href="{% url 'index' %}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-500 transition">
+                &lt; Back to Home
+            </a>
+        </div>
+        
+        <!-- Categories Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for category in categories %}
+                <div class="relative rounded-2xl overflow-hidden h-80 group shadow-sm hover:shadow-xl transition-all duration-300 bg-slate-200">
+                    <!-- Admin Panel Image Check -->
+                    {% if category.image %}
+                        <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    {% else %}
+                        <div class="w-full h-full bg-slate-800 flex items-center justify-center text-white font-bold text-lg">
+                            {{ category.name }}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Dark Overlay Gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+                    <!-- Category Name Content -->
+                    <div class="absolute bottom-4 left-4 right-4 text-white">
+                        <h3 class="font-bold text-lg">{{ category.name }}</h3>
+                        <p class="text-xs text-slate-300 mt-0.5">Explore collection</p>
+                    </div>
+                    
+                    <!-- Clickable Link Overlay -->
+                    <a href="#" class="absolute inset-0"></a>
+                </div>
+            {% empty %}
+                <p class="text-slate-500 col-span-full text-center py-8">No categories found in the database.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>

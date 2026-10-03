@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-white font-sans">
+    <div class="max-w-2xl mx-auto mt-20 p-8 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl">
+        <div class="flex items-center space-x-4 mb-6">
+            <div class="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center text-2xl font-bold">
+                {{ request.user.first_name|slice:":1"|upper }}
+            </div>
+            <div>
+                <h1 class="text-xl font-bold">{{ request.user.first_name }}</h1>
+                <p class="text-sm text-slate-400">{{ request.user.email }}</p>
+            </div>
+        </div>
+        <div class="border-t border-slate-800 pt-4">
+            <p class="text-xs text-slate-400">Account status: <span class="text-emerald-400 font-semibold">Active & Connected to Database</span></p>
+        </div>
+        <div class="mt-6">
+            <a href="{% url 'index' %}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-sm font-medium rounded-xl transition">Back to Store</a>
+        </div>
+    </div>
+</body>
+</html>

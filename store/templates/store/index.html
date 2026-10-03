@@ -1,0 +1,465 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeAlpha Store - Premium Shopping Experience</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-600 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- 🔝 1. NAVBAR (Sticky) -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Mobile Menu Toggle Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-slate-700 text-xl focus:outline-none">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <!-- Brand Logo -->
+            <a href="#" class="text-2xl font-black tracking-tight text-slate-900 flex items-center gap-2">
+                <span class="bg-indigo-600 text-white w-9 h-9 rounded-xl flex items-center justify-center text-lg font-bold">C</span>
+                CodeAlpha
+            </a>
+
+            <!-- Desktop Navigation Links & Categories Dropdown -->
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
+                <a href="#" class="hover:text-indigo-600 transition">Home</a>
+                <div class="relative group">
+                    <button class="flex items-center gap-1 hover:text-indigo-600 transition py-2">
+                        Categories <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </button>
+                    <!-- Dropdown -->
+                    <div class="absolute top-full left-0 w-48 bg-white shadow-xl rounded-xl py-2 border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+                        <a href="#trending" class="block px-4 py-2 text-sm text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">Men's Fashion</a>
+                        <a href="#trending" class="block px-4 py-2 text-sm text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">Women's Wear</a>
+                        <a href="#trending" class="block px-4 py-2 text-sm text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">Electronics</a>
+                        <a href="#trending" class="block px-4 py-2 text-sm text-slate-600 hover:bg-indigo-50 hover:text-indigo-600">Accessories</a>
+                    </div>
+                </div>
+                <a href="#best-sellers" class="hover:text-indigo-600 transition">Best Sellers</a>
+                <a href="#why-us" class="hover:text-indigo-600 transition">About Us</a>
+            </nav>
+
+            <!-- Search Bar (Center/Right) -->
+            <div class="hidden lg:flex items-center relative w-72">
+                <input type="text" placeholder="Search products, brands..." class="w-full bg-slate-100 text-sm px-4 py-2.5 pl-10 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 border border-transparent transition">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 text-slate-400 text-sm"></i>
+            </div>
+
+           <!-- Right Icons (Cart, User, Wishlist) -->
+<div class="flex items-center space-x-5 text-slate-700">
+    <a href="#" class="relative hover:text-indigo-600 transition hidden sm:block" title="Wishlist">
+        <i class="fa-regular fa-heart text-xl"></i>
+        <span class="absolute -top-1.5 -right-2 bg-pink-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">2</span>
+    </a>
+
+{% if request.user.is_authenticated %} <div class="relative inline-block text-left"> <button id="profile-dropdown-btn" onclick="document.getElementById('profile-dropdown-menu').classList.toggle('hidden')" class="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full transition cursor-pointer focus:outline-none"> <i class="fa-solid fa-user text-indigo-600 text-sm"></i> <span class="text-xs font-bold text-slate-800">{{ request.user.first_name|default:request.user.username }}</span> <i class="fa-solid fa-chevron-down text-[10px] text-slate-500"></i> </button>
+
+    <!-- Dropdown Menu -->
+    <div id="profile-dropdown-menu"
+         class="hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50">
+
+        <a href="{% url 'profile' %}"
+           class="px-4 py-2 text-xs text-slate-700 hover:bg-slate-100 flex items-center space-x-2">
+            <i class="fa-solid fa-user-gear w-4 text-indigo-600"></i>
+            <span>Profile</span>
+        </a>
+
+        <a href="{% url 'about' %}"
+           class="px-4 py-2 text-xs text-slate-700 hover:bg-slate-100 flex items-center space-x-2">
+            <i class="fa-solid fa-circle-info w-4 text-indigo-600"></i>
+            <span>About</span>
+        </a>
+
+        <div class="border-t border-slate-100 my-1"></div>
+
+        <form action="{% url 'logout' %}" method="post" class="w-full">
+            {% csrf_token %}
+
+            <button type="submit"
+                    class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-slate-100 flex items-center space-x-2 bg-transparent border-none">
+                <i class="fa-solid fa-right-from-bracket w-4 text-red-500"></i>
+                <span>Logout</span>
+            </button>
+        </form>
+
+    </div>
+</div>
+
+
+    {% else %}
+        <a href="{% url 'login' %}" class="hover:text-indigo-600 transition flex items-center space-x-1" title="User Account">
+            <i class="fa-regular fa-user text-xl"></i>
+        </a>
+    {% endif %}
+
+   <!-- 1. Sab se pehle Navbar / Cart Icon yahan mukammal band (close) hona chahiye -->
+<!-- Navbar Cart Icon (Isay navbar ke andar sahi jagah rakhein) -->
+<a href="{% url 'cart' %}" id="cart-icon-btn" class="relative hover:text-indigo-600 transition" title="Shopping Cart">
+    <i class="fa-solid fa-bag-shopping text-xl"></i>
+    <span id="cart-counter" class="absolute -top-1.5 -right-2 bg-indigo-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+        {{ cart_count|default:"0" }}
+    </span>
+</a>
+
+<!-- Products List Section -->
+<div class="container my-5">
+    <div class="row">
+        {% for product in products %}
+           
+        {% endfor %}
+    </div>
+</div>
+</form>
+</a>
+</div>
+           <!-- Mobile Drawer Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 px-6 py-4 space-y-3">
+            <a href="#" class="block text-slate-700 font-medium py-1">Home</a>
+            <a href="#trending" class="block text-slate-700 font-medium py-1">Categories</a>
+            <a href="#best-sellers" class="block text-slate-700 font-medium py-1">Best Sellers</a>
+            <a href="#why-us" class="block text-slate-700 font-medium py-1">About Us</a>
+           <button onclick="openAuthModal('login')" class="hover:text-indigo-600 transition focus:outline-none" title="User Account">
+    <i class="fa-regular fa-user text-xl"></i>
+</button>
+        </div>
+    </header>
+    
+
+    <!-- 🎯 2. HERO SECTION -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
+        <div class="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl overflow-hidden shadow-2xl text-white px-8 md:px-16 py-20 md:py-28 flex flex-col justify-center min-h-[500px]">
+            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            
+            <div class="relative z-10 max-w-2xl space-y-6">
+                <span class="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs px-3 py-1 rounded-full uppercase tracking-widest font-bold">New Autumn Collection</span>
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">Elevate Your Everyday Style.</h1>
+                <p class="text-slate-300 text-base md:text-lg font-normal leading-relaxed">Discover curated minimal apparel, high-performance tech gadgets, and timeless accessories designed for the modern lifestyle.</p>
+                
+                <div class="flex flex-wrap gap-4 pt-4">
+                    <a href="#trending" class="bg-indigo-600 text-white px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-indigo-700 transition shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+                        Shop Now <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                    <a href="#best-sellers" class="bg-white/10 backdrop-blur-md text-white border border-white/20 px-8 py-3.5 rounded-full font-semibold text-sm hover:bg-white/20 transition">
+                        Explore Collection
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   <!-- 🛍️ 3. FEATURED CATEGORIES -->
+   <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header with View All -->
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Featured Categories</h2>
+            <p class="text-sm text-slate-500 mt-1">Explore our most popular departments</p>
+        </div>
+        <!-- View All Link (Aap isay kisi alag category list page ya all products page par link kar sakti hain) -->
+       <a href="{% url 'all_categories' %}" class="text-sm font-semibold text-indigo-600 hover:text-indigo-500 transition">
+    View All &gt;
+</a>
+    </div>
+
+    <!-- 4 Categories Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- [:4] ki madad se sirf pehli 4 categories show hongi -->
+        {% for category in categories|slice:":4" %}
+            <div class="relative rounded-2xl overflow-hidden h-80 group shadow-sm hover:shadow-xl transition-all duration-300">
+                <!-- Background Image (Agar Category model mein image field ho, warna gradient/default color) -->
+                {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                {% else %}
+                    <div class="w-full h-full bg-slate-800 flex items-center justify-center text-white font-bold text-lg">
+                        {{ category.name }}
+                    </div>
+                {% endif %}
+                
+                <!-- Dark Overlay Gradient -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+                <!-- Category Text Content -->
+                <div class="absolute bottom-4 left-4 right-4 text-white">
+                    <h3 class="font-bold text-lg">{{ category.name }}</h3>
+                    <p class="text-xs text-slate-300 mt-0.5">Explore collection</p>
+                </div>
+
+                <!-- Clickable Link Overlay -->
+                <a href="#" class="absolute inset-0"></a>
+            </div>
+        {% empty %}
+            <p class="text-sm text-slate-500">No categories added in Django Admin yet.</p>
+        {% endfor %}
+    </div>
+</section>
+   <section id="trending" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Trending Products</h2>
+            <p class="text-sm text-slate-500 mt-1">Most demanded items from database</p>
+        </div>
+    </div>
+
+    <!-- Django Direct Product Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for product in products %}
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
+                <div>
+                    <div class="relative bg-slate-100 rounded-xl h-64 overflow-hidden mb-4">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.title }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-slate-200 text-slate-500 text-xs">No Image</div>
+                        {% endif %}
+                        <span class="absolute top-3 left-3 bg-indigo-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Sale</span>
+                    </div>
+                    <h4 class="font-semibold text-slate-800 text-sm truncate">{{ product.title }}</h4>
+                </div>
+                <div class="flex items-center justify-between mt-4">
+                    <span class="text-indigo-600 font-bold">${{ product.price }}</span>
+                    
+                    <!-- Asli Django Add to Cart Form -->
+                    <form action="{% url 'add_to_cart' product.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-slate-900 text-white text-xs px-3.5 py-2 rounded-xl hover:bg-indigo-600 transition font-medium cursor-pointer">
+                            Add to Cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-slate-500">No products found in database. Please add products from Django Admin panel.</p>
+        {% endfor %}
+    </div>
+</section>
+    <!-- ⭐ 5. BEST SELLERS CAROUSEL -->
+    <section id="best-sellers" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Best Sellers</h2>
+                <p class="text-sm text-slate-500 mt-1">Customer favorites backed by top ratings</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="slide-left" class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 shadow-sm"><i class="fa-solid fa-arrow-left"></i></button>
+                <button id="slide-right" class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 shadow-sm"><i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Carousel Track -->
+        <div id="carousel-track" class="flex gap-6 overflow-x-auto hide-scrollbar scroll-smooth pb-4">
+            <!-- Items rendered via JS or hardcoded template elements -->
+            <div class="min-w-[260px] md:min-w-[280px] bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0">
+                <div class="relative bg-slate-100 rounded-xl h-60 overflow-hidden mb-4">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover">
+                    <span class="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Best Seller</span>
+                </div>
+                <h4 class="font-semibold text-slate-800 text-sm truncate">Nike Air Max Runner</h4>
+                <div class="flex items-center justify-between mt-2">
+                    <span class="text-indigo-600 font-bold">$129.00</span>
+                    <button onclick="addToCart('Nike Air Max Runner', 129.00)" class="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg hover:bg-indigo-600 transition">Add to Cart</button>
+                </div>
+            </div>
+            <div class="min-w-[260px] md:min-w-[280px] bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0">
+                <div class="relative bg-slate-100 rounded-xl h-60 overflow-hidden mb-4">
+                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover">
+                    <span class="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Best Seller</span>
+                </div>
+                <h4 class="font-semibold text-slate-800 text-sm truncate">Studio Wireless Headphones</h4>
+                <div class="flex items-center justify-between mt-2">
+                    <span class="text-indigo-600 font-bold">$249.00</span>
+                    <button onclick="addToCart('Studio Wireless Headphones', 249.00)" class="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg hover:bg-indigo-600 transition">Add to Cart</button>
+                </div>
+            </div>
+            <div class="min-w-[260px] md:min-w-[280px] bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0">
+                <div class="relative bg-slate-100 rounded-xl h-60 overflow-hidden mb-4">
+                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover">
+                    <span class="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Best Seller</span>
+                </div>
+                <h4 class="font-semibold text-slate-800 text-sm truncate">Minimalist Classic Watch</h4>
+                <div class="flex items-center justify-between mt-2">
+                    <span class="text-indigo-600 font-bold">$189.00</span>
+                    <button onclick="addToCart('Minimalist Classic Watch', 189.00)" class="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg hover:bg-indigo-600 transition">Add to Cart</button>
+                </div>
+            </div>
+            <div class="min-w-[260px] md:min-w-[280px] bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex-shrink-0">
+                <div class="relative bg-slate-100 rounded-xl h-60 overflow-hidden mb-4">
+                    <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover">
+                    <span class="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">Best Seller</span>
+                </div>
+                <h4 class="font-semibold text-slate-800 text-sm truncate">Leather Crossbody Bag</h4>
+                <div class="flex items-center justify-between mt-2">
+                    <span class="text-indigo-600 font-bold">$159.00</span>
+                    <button onclick="addToCart('Leather Crossbody Bag', 159.00)" class="bg-slate-900 text-white text-xs px-3 py-2 rounded-lg hover:bg-indigo-600 transition">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🎁 6. PROMOTIONAL BANNER -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between shadow-xl">
+            <div class="space-y-3 mb-6 md:mb-0">
+                <span class="bg-white/20 text-xs px-3 py-1 rounded-full uppercase tracking-wider font-bold">Limited Time Offer</span>
+                <h3 class="text-3xl font-extrabold">Get 25% Off On Your First Order</h3>
+                <p class="text-indigo-100 text-sm max-w-md">Sign up for our newsletter and use code <span class="bg-black/20 px-2 py-0.5 rounded font-mono font-bold">WELCOME25</span> at checkout.</p>
+            </div>
+            <a href="#trending" class="bg-white text-indigo-600 px-8 py-3.5 rounded-full font-bold text-sm hover:bg-slate-100 transition shadow-md">Claim Discount</a>
+        </div>
+    </section>
+
+    <!-- 🧾 7. TESTIMONIALS / REVIEWS -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center max-w-xl mx-auto mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">Loved By Thousands</h2>
+            <p class="text-sm text-slate-500 mt-1">See what our customers have to say about their experience.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div class="flex text-amber-400 text-sm gap-1">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed">"The delivery was incredibly fast and the quality of the apparel feels extremely premium. Reminds me of high-end boutique stores."</p>
+                <div class="flex items-center gap-3 pt-2">
+                    <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm">AS</div>
+                    <div>
+                        <h5 class="text-sm font-bold text-slate-800">Ayesha Siddiqui</h5>
+                        <p class="text-xs text-slate-400">Verified Buyer</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div class="flex text-amber-400 text-sm gap-1">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed">"Clean UI, seamless checkout process, and top-tier customer support. CodeAlpha Store is my new go-to shopping platform!"</p>
+                <div class="flex items-center gap-3 pt-2">
+                    <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm">UK</div>
+                    <div>
+                        <h5 class="text-sm font-bold text-slate-800">Usman Khan</h5>
+                        <p class="text-xs text-slate-400">Verified Buyer</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                <div class="flex text-amber-400 text-sm gap-1">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <p class="text-slate-600 text-sm leading-relaxed">"The packaging was eco-friendly and gorgeous. The headphones I ordered exceeded all my audio performance expectations."</p>
+                <div class="flex items-center gap-3 pt-2">
+                    <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-sm">ZH</div>
+                    <div>
+                        <h5 class="text-sm font-bold text-slate-800">Zainab Hussain</h5>
+                        <p class="text-xs text-slate-400">Verified Buyer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 📦 8. WHY CHOOSE US -->
+    <section id="why-us" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-800">Fast Express Delivery</h4>
+                    <p class="text-xs text-slate-500 mt-1">Free shipping on all orders over $50 delivered right to your doorstep.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-800">Secure Payments</h4>
+                    <p class="text-xs text-slate-500 mt-1">Encrypted and secure transactions via cards, Apple Pay, and local gateways.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl flex-shrink-0">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-slate-800">Hassle-Free Returns</h4>
+                    <p class="text-xs text-slate-500 mt-1">30-day money-back guarantee with zero questions asked on return policy.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 📩 9. NEWSLETTER SECTION -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-slate-900 text-white rounded-3xl p-8 md:p-12 text-center max-w-3xl mx-auto space-y-4">
+            <h3 class="text-2xl md:text-3xl font-bold">Stay Updated</h3>
+            <p class="text-slate-400 text-sm">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
+            <form onsubmit="handleSubscribe(event)" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto pt-2">
+                <input type="email" id="newsletter-email" placeholder="Enter your email address..." required class="flex-1 bg-slate-800 border border-slate-700 text-sm px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white">
+                <button type="submit" class="bg-indigo-600 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 🔻 10. FOOTER -->
+    <footer class="bg-white border-t border-slate-200 pt-12 pb-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div class="space-y-3">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span class="bg-indigo-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-sm">C</span> CodeAlpha
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Providing high-grade minimal products and seamless e-commerce solutions for modern digital consumers.</p>
+            </div>
+            <div>
+                <h5 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Quick Links</h5>
+                <ul class="space-y-2 text-xs text-slate-600">
+                    <li><a href="#" class="hover:text-indigo-600">About Us</a></li>
+                    <li><a href="#" class="hover:text-indigo-600">Contact Support</a></li>
+                    <li><a href="#" class="hover:text-indigo-600">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-indigo-600">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Categories</h5>
+                <ul class="space-y-2 text-xs text-slate-600">
+                    <li><a href="#trending" class="hover:text-indigo-600">Men's Apparel</a></li>
+                    <li><a href="#trending" class="hover:text-indigo-600">Women's Collection</a></li>
+                    <li><a href="#trending" class="hover:text-indigo-600">Electronics & Audio</a></li>
+                    <li><a href="#trending" class="hover:text-indigo-600">Accessories</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wider">Connect With Us</h5>
+                <div class="flex space-x-3 text-slate-600">
+                    <a href="#" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition"><i class="fa-brands fa-facebook-f text-xs"></i></a>
+                    <a href="#" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition"><i class="fa-brands fa-instagram text-xs"></i></a>
+                    <a href="#" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition"><i class="fa-brands fa-twitter text-xs"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
+            &copy; 2026 CodeAlpha Store. All rights reserved. Built with Django & Tailwind CSS.
+        </div>
+    </footer>
+    <!-- JavaScript Link -->
+   <script src="{% static 'store/js/shop.js' %}"></script>
+</body>
+</html>
