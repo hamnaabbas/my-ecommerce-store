@@ -6,6 +6,9 @@ services:
       - mode: ingress
         target: 8000
         published: 8000
+    environment:
+      SECRET_KEY:
+      DEBUG: "False"
     deploy:
       resources:
         reservations:
