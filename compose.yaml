@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - DATABASE_URL=yahan_apni_neon_tech_ki_connection_string_dalein
+      - SECRET_KEY=yahan_apni_django_secret_key_dalein
